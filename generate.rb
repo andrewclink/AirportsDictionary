@@ -39,23 +39,55 @@ class Dictionary
 
       @entries.each do |feature|
         @xml.tag!('d:entry', 'id' => feature.id, 'd:title' => "#{feature.name} (Airport)") do
+
+          name = if feature.name =~ /airport/i
+            feature.name
+          else
+            feature.name + ' Airport'
+          end
           unless feature.ident.nil?
-            @xml.tag!('d:index', {'d:value': feature.ident}) 
-            @xml.tag!('d:index', {'d:value': feature.ident + " (Airport)", 'd:priority': 2})
+            t = feature.ident + " (Airport)"
+            @xml.tag!('d:index', {'d:value': feature.ident, 'd:title': t})
+            # @xml.tag!('d:index', {'d:value': feature.ident + " (Airport)", 'd:title': t})
           end
           unless feature.icao.nil?
-            @xml.tag!('d:index', {'d:value': feature.icao, 'd:priority': 1})
-            @xml.tag!('d:index', {'d:value': feature.icao + " (Airport)", 'd:priority': 2}) 
+            t = feature.icao + " (Airport)"
+            @xml.tag!('d:index', {'d:value': feature.icao}, 'd:title': t)
+            # @xml.tag!('d:index', {'d:value': feature.icao + " (Airport)", 'd:priority': 2})
           end
           unless feature.name.nil?
-            @xml.tag!('d:index', {'d:value': feature.name, 'd:priority': 3}) 
+            @xml.tag!('d:index', {'d:value': name })
             feature.name.split(' ').each_with_index do |term, i|
-              @xml.tag!('d:index', {'d:value': term, 'd:priority': 4 + i}) 
+              next unless term.length > 3
+              @xml.tag!('d:index', { 'd:value': term })
             end
           end
-
+          # unless feature.ident.nil?
+          #   @xml.tag!('d:index') do
+          #     @xml.tag!('d:index_value', feature.ident)
+          #     @xml.tag!('d:index_title', (feature.icao || feature.ident) + " (Airport)")
+          #   end
+          # end
+          # unless feature.icao.nil?
+          #   @xml.tag!('d:index') do
+          #     @xml.tag!('d:index_value', feature.icao)
+          #     @xml.tag!('d:index_title', feature.icao + " (Airport)")
+          #   end
+          # end
+          # unless feature.name.nil?
+          #   @xml.tag!('d:index') do
+          #     n = if feature.name =~ /airport/i
+          #       feature.name
+          #     else
+          #       feature.name + ' Airport'
+          #     end
+          #     @xml.tag!('d:index_value', n)
+          #     @xml.tag!('d:index_title', n)
+          #   end
+          # end
+          
           # Add the header
-          xml.div('d:priority' => '2') do
+          xml.div do
             xml.h1 "#{feature.name} (#{feature.ident})"
           end
 
@@ -68,7 +100,7 @@ class Dictionary
           end
 
           # Add the details
-          xml.div do
+          xml.div('d:priority': 2) do
             xml.dl do
               xml.dt 'Elevation'
               xml.dd feature.elev || '(Unknown)'
