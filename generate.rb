@@ -93,14 +93,10 @@ class Dictionary
 
           # This is usually the pronounciation section,
           # but we're mostly dealing with pseudo-initialisms here.
-          xml.span(:class => 'syntax') do
-            xml.span('d:pr' => 'US') do
-              xml.text [feature.city, feature.state].join(', ').strip
-            end
-          end
+          xml.span({:class => 'locality'}, [feature.city, feature.state].join(', ').strip)
 
           # Add the details
-          xml.div('d:priority': 2) do
+          xml.div('d:priority': 0) do
             xml.dl do
               xml.dt 'Elevation'
               xml.dd feature.elev || '(Unknown)'
@@ -113,7 +109,7 @@ class Dictionary
                     feature.loc.lng.to_f
                   ]
                   xml.tag!('br')
-                  xml.a(href: "http://maps.apple.com/?ll=#{ll.join(',')}") do
+                  xml.a(href: "http://maps.apple.com/?q=#{name}&ll=#{ll.join(',')}&z=8", 'd:priority': 2) do
                     xml.text! "Map Link"
                   end
                 end
